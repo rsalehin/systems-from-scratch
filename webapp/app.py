@@ -1,25 +1,35 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
+from database import insert_note, get_all_notes, get_note
 
 app = Flask(__name__)
 
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    notes = get_all_notes()
+    return render_template("home.html", notes=notes)
 
 
 @app.route("/note", methods=["POST"])
 def create_note():
-    # Flask parses the URL-encoded body automatically
-    # request.form is a dictionary of field name → value
-    title = request.form.get("title", "")
-    body  = request.form.get("body", "")
+    title = request.form.get("title", "").strip()
+    body  = request.form.get("body", "").strip()
 
-    # Print to terminal so we can see what arrived
-    print(f"Received note — title: '{title}', body: '{body}'")
+    if not title or not body:
+        return "Title and body are required.", 400
 
-    # For now: just show it back to the user
-    return render_template("note_created.html", title=title, body=body)
+    new_id = insert_note(title, body)
+
+    # Redirect to the new note's page
+    return redirect(url_for("view_note", note_id=new_id))
+
+
+@app.route("/note/<int:note_id>")
+def view_note(note_id):
+    note = get_note(note_id)
+    if note is None:
+        return "<h1>Note not found</h1>", 404
+    return render_template("note_created.html", title=note["title"], body=note["body"])
 
 
 @app.errorhandler(404)
