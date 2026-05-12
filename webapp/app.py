@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from database import insert_note, get_all_notes, get_note_by_short_id
 from validate import validate_note
+import os
 
 app = Flask(__name__)
 
@@ -50,4 +51,7 @@ def not_found(error):
 
 
 if __name__ == "__main__":
-    app.run(port=9000, debug=True)
+    # Read from environment, default to development settings
+    debug_mode = os.environ.get("FLASK_DEBUG", "true").lower() == "true"
+    port       = int(os.environ.get("PORT", "9000"))
+    app.run(port=port, debug=debug_mode)

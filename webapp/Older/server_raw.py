@@ -33,8 +33,7 @@ while True:
     if not raw_request:
         connection.close()
         continue
-    print(raw_request)
-    print(raw_request.decode("utf-8"))
+
     parsed = parse_http_request(raw_request)
     print(f"── {parsed['method']} {parsed['path']} ──")
 
