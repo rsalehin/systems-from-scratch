@@ -1,18 +1,25 @@
 from flask import Flask, render_template, request
-import os
 
 app = Flask(__name__)
 
 
 @app.route("/")
 def home():
-    # Pass data into the template as keyword arguments
-    return render_template("home.html", visitor_ip=request.remote_addr)
+    return render_template("home.html")
 
 
-@app.route("/about")
-def about():
-    return render_template("about.html")
+@app.route("/note", methods=["POST"])
+def create_note():
+    # Flask parses the URL-encoded body automatically
+    # request.form is a dictionary of field name → value
+    title = request.form.get("title", "")
+    body  = request.form.get("body", "")
+
+    # Print to terminal so we can see what arrived
+    print(f"Received note — title: '{title}', body: '{body}'")
+
+    # For now: just show it back to the user
+    return render_template("note_created.html", title=title, body=body)
 
 
 @app.errorhandler(404)

@@ -2,16 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Home</title>
+    <title>Create a Note</title>
     <style>
         body { font-family: sans-serif; max-width: 600px; margin: 60px auto; }
-        a { color: steelblue; }
+        input, textarea { width: 100%; padding: 8px; margin: 8px 0 16px; 
+                          box-sizing: border-box; font-size: 1rem; }
+        button { padding: 10px 24px; background: steelblue; 
+                 color: white; border: none; cursor: pointer; font-size: 1rem; }
     </style>
 </head>
 <body>
-    <h1>Welcome</h1>
-    <p>This HTML came from a file on disk.</p>
-    <p>You are visiting from: {{ visitor_ip }}</p>
-    <a href="/about">About</a>
+    <h1>Create a Note</h1>
+
+    <form action="/note" method="POST">
+        <label>Title</label>
+        <input type="text" name="title" placeholder="Note title">
+
+        <label>Body</label>
+        <textarea name="body" rows="5" placeholder="Write your note..."></textarea>
+
+        <button type="submit">Save Note</button>
+    </form>
 </body>
 </html>
