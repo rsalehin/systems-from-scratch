@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-from database import insert_note, get_all_notes, get_note_by_short_id
+from database import insert_note, get_all_notes, get_note_by_short_id, delete_note
 from validate import validate_note
 from logger import logger
 import os, time
@@ -37,18 +37,17 @@ def create_note():
 
     if errors:
         logger.warning(f"validation failed: {errors}  title='{title[:50]}'")
-        # Return JSON error so JavaScript can show it
         return jsonify({"ok": False, "errors": errors}), 400
 
     short_id = insert_note(title.strip(), body.strip())
     logger.info(f"note created: short_id={short_id}  title='{title.strip()[:50]}'")
 
-    # Return JSON with the new note's data
     return jsonify({
         "ok":       True,
         "short_id": short_id,
         "title":    title.strip(),
-    }), 201  # 201 = Created
+        "url":      f"/note/{short_id}"
+    }), 201
 
 
 @app.route("/note/<short_id>")
@@ -59,6 +58,17 @@ def view_note(short_id):
         return render_template("not_found.html"), 404
     logger.debug(f"note viewed: short_id={short_id}")
     return render_template("note.html", note=note)
+
+@app.route("/note/<short_id>/delete", methods=["POST"])
+def delete_note_route(short_id):
+    deleted = delete_note(short_id)
+
+    if not deleted:
+        logger.warning(f"delete failed: short_id={short_id} not found")
+        return jsonify({"ok": False, "error": "Note not found"}), 404
+
+    logger.info(f"note deleted: short_id={short_id}")
+    return jsonify({"ok": True})
 
 
 @app.errorhandler(404)

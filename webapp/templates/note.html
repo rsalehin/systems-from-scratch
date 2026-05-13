@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <title>{{ note['title'] }}</title>
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 60px auto; }
-        .note { background: #f5f5f5; padding: 24px; border-radius: 6px; }
-        .meta { color: #888; font-size: 0.85rem; margin-top: 16px; }
-        .share { margin-top: 24px; padding: 12px; background: #e8f4fd;
-                 border-radius: 4px; font-family: monospace; word-break: break-all; }
-        a { color: steelblue; }
+        body    { font-family: sans-serif; max-width: 600px; margin: 60px auto; }
+        .note   { background: #f5f5f5; padding: 24px; border-radius: 6px; }
+        .meta   { color: #888; font-size: 0.85rem; margin-top: 16px; }
+        .share  { margin-top: 24px; padding: 12px; background: #e8f4fd;
+                  border-radius: 4px; font-family: monospace; word-break: break-all; }
+        .actions { margin-top: 24px; display: flex; gap: 12px; align-items: center; }
+        .btn-delete { padding: 8px 20px; background: #e53e3e; color: white;
+                      border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem; }
+        .btn-delete:hover    { background: #c53030; }
+        .btn-delete:disabled { background: #aaa; cursor: not-allowed; }
+        a { color: steelblue; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -24,5 +29,41 @@
     <div class="share">
         http://localhost:9000/note/{{ note['short_id'] }}
     </div>
+
+    <div class="actions">
+        <button class="btn-delete" id="delete-btn">Delete this note</button>
+        <span id="status-msg"></span>
+    </div>
+
+    <script>
+        const deleteBtn = document.getElementById("delete-btn")
+        const statusMsg = document.getElementById("status-msg")
+        const shortId   = "{{ note['short_id'] }}"
+
+        deleteBtn.addEventListener("click", async function() {
+            // Ask for confirmation — deletion is irreversible
+            const confirmed = window.confirm("Delete this note permanently?")
+            if (!confirmed) return
+
+            deleteBtn.disabled    = true
+            deleteBtn.textContent = "Deleting..."
+
+            const response = await fetch(`/note/${shortId}/delete`, {
+                method: "POST"
+            })
+
+            const data = await response.json()
+
+            if (data.ok) {
+                // Note is gone — go back to home
+                window.location.href = "/"
+            } else {
+                statusMsg.textContent = "Could not delete — note not found."
+                statusMsg.style.color = "red"
+                deleteBtn.disabled    = false
+                deleteBtn.textContent = "Delete this note"
+            }
+        })
+    </script>
 </body>
 </html>

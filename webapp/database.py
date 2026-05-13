@@ -55,3 +55,18 @@ def get_note_by_short_id(short_id):
     row = cursor.fetchone()
     conn.close()
     return row
+
+def delete_note(short_id):
+    conn   = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM notes WHERE short_id = ?", (short_id,))
+
+    # rowcount tells us how many rows were actually deleted
+    # 0 means the short_id didn't exist
+    deleted = cursor.rowcount
+
+    conn.commit()
+    conn.close()
+
+    return deleted > 0   # True if something was deleted, False if not found
